@@ -29,23 +29,14 @@ app.controller('DemoCtrl', function($scope, cyTableParams, DataServ) {
         count: 10 // 10 items per page
     }, {
         debugMode: true,
-        getData: function($defer, params) {
+        getData: function($defer, params, all) {
             var page = params.page(),
                 count = params.count(),
                 pageIndex = page - 1,
                 query = {
                     start: pageIndex * count,
-                    length: count
+                    length: all ? 1024 : count
                 };
-            /*params.query(function(key, value) {
-                if(key === 'page') {
-                    return ['start', (value - 1) * params.count()];
-                }
-                if(key === 'count') {
-                    return ['length', value];
-                }
-                return false;
-            })*/
             DataServ.fetch(query).then(function(data) {
                 setTimeout(function() {
                     console.log(data)

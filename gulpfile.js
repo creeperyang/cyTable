@@ -120,7 +120,7 @@ gulp.task('serve', ['build', 'wiredep', 'fonts', 'styles', 'images'], function()
 
     // watch for changes
     gulp.watch([
-        'dist/*.*',
+        'dist/*',
         'demo/*.html',
         'demo/scripts/{,*/}*.js',
         'demo/styles/{,*/}*.css',

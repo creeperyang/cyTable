@@ -18,7 +18,7 @@
             <h2>cy-table <small class='text-danger'>v0.1.0</small></h2>
         </div>
         <div ng-controller='DemoCtrl'>
-            <div cy-table table-params="tableParams" template-pagination="pager.html" template-operation="operation.html" show-filter="false">
+            <div cy-table cy-table-csv='tableCsv' table-params="tableParams" template-pagination="pager.html" template-operation="operation.html" show-filter="false">
                 <div class="cy-table-operation row"></div>
                 <table class="table table-striped table-hover table-condensed table-bordered">
                     <tr ng-repeat="device in $data">
@@ -65,7 +65,7 @@
     </script>
     <script type="text/ng-template" id="operation.html">
         <div class="oneline-top-space">
-            <div class="col-sm-3">
+            <div class="col-sm-6 col-md-3">
                 <p>每页项数</p>
                 <div class="cy-dropdown page-size-dropdown" dropdown>
                     <div class='input-group'>
@@ -86,6 +86,14 @@
                         <li><a ng-class="{'active':params.count() == 20}" ng-click="params.count(20)">20</a>
                         </li>
                     </ul>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-3">
+                <p>操作</p>
+                <div>
+                    <button type="button" class="btn btn-success" ng-mousedown="tableCsv.generate($event, true)" ng-disabled="tableCsv.generating" ng-click='tableCsv.download("download.csv")'>
+                        导出表格&nbsp;<i class='glyphicon glyphicon-export'></i>
+                    </button>
                 </div>
             </div>
         </div>

@@ -44,14 +44,14 @@
         // data handlers to handle data get from #getData
         // inner usage now
         var dataHandlers = {
-            adjust: function adjustData(data, tableParams) {
+            adjust: function adjustData(data, tableParams, notCutData) {
                 if (angular.isArray(data)) {
                     return {
-                        list: data.slice(0, tableParams.count()),
+                        list: notCutData ? data : data.slice(0, tableParams.count()),
                         total: data.length
                     };
                 } else if (angular.isObject(data)) {
-                    data.list = data.list.slice(0, tableParams.count());
+                    data.list = notCutData ? data.list : data.list.slice(0, tableParams.count());
                     return data;
                 } else {
                     tableParams.data = [];
@@ -324,6 +324,23 @@
                         total: 0
                     });
                 }
+            };
+
+            /**
+             * @ngdoc method
+             * @name cyTable.factory:cyTableParams#getAllData
+             * @methodOf cyTable.factory:cyTableParams
+             * @description Called when want to load all data(such as export csv)
+             *
+             * @returns {Object} $defer
+             */
+            this.getAllData = function() {
+                var $defer = $q.defer();
+                props.getData($defer, self, true);
+                $defer.promise.then(function(data) {
+                    props.$scope.$allData = dataHandlers.adjust(data, self, true).list;
+                });
+                return $defer;
             };
 
             /**
@@ -830,6 +847,131 @@
             };
         }
     ]);
+
+    /**
+     * @ngdoc directive
+     * @name cyTable.directive:cyTableCsv
+     * @restrict A
+     *
+     * @description
+     * Directive that helps export table to csv
+     */
+    app.directive('cyTableCsv', ['$parse', '$compile', '$timeout', function ($parse, $compile, $timeout) {
+        return {
+            restrict: 'A',
+            scope: false,
+            link: function(scope, element, attrs) {
+                var csvStr = '';
+                var allData;
+                var slice = Array.prototype.slice;
+                // actual delimiter characters for CSV format
+                var colDelim = '","';
+                var rowDelim = '"\r\n"';
+                // Temporary delimiter characters unlikely to be typed by keyboard
+                // This is to avoid accidentally splitting the actual contents
+                var tmpColDelim = String.fromCharCode(11); // vertical tab character
+                var tmpRowDelim = String.fromCharCode(0); // null character
+                var csv = {
+                    stringify: function(str) {
+                        return str.replace(/^\s\s*/, '').replace(/\s*\s$/, '') // trim spaces
+                            .replace(/"/g,'""'); // replace quotes with double quotes
+                    },
+                    generate: function($event, all) {
+                        var target;
+                        if (scope.$csvGenerated) {
+                            return;
+                        }
+                        csv.generating = true;
+                        if (all && scope.params.getAllData) {
+                            $event.preventDefault();
+                            $event.stopPropagation();
+                            target = $event.target;
+                            scope.params.getAllData().promise.then(function() {
+                                var table = $compile(scope.$rowTpl)(scope);
+                                $timeout(function() {
+                                    table.prepend(element.find('thead').clone());
+                                    csvStr = genCsv(table.find('tr'), function(row) {
+                                        return row && row.hasClass('ng-table-filters');
+                                    });
+                                    csv.generating = false;
+                                    $timeout(function() {
+                                        target.click();
+                                    });
+                                });
+                            });
+                        } else {
+                            csvStr = genCsv(element.find('tr'), function(row) {
+                                return row && row.hasClass('ng-table-filters');
+                            });
+                            csv.generating = false;
+                        }
+                        scope.$csvGenerated = true;
+                    },
+                    link: function() {
+                        return 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvStr);
+                    },
+                    download: function(fileName) {
+                        download(csvStr, fileName || 'dowload.csv', 'text/csv');
+                    },
+                    generating: false
+                };
+                $parse(attrs.cyTableCsv).assign(scope.$parent, csv);
+
+                function genCsv(rows, ignoreRow) {
+                    if (!rows || !rows.length) {
+                        return '';
+                    }
+                    var handledRows = [];
+                    slice.call(rows).map(function (row) {
+                        row = angular.element(row);
+                        var cols = row.find('th');
+                        if (cols.length === 0) {
+                            cols = row.find('td');
+                        }
+                        if (ignoreRow && ignoreRow(row)) {
+                            return;
+                        }
+                        handledRows.push(slice.call(cols).map(function (col) {
+                            return csv.stringify(angular.element(col).text());
+                        }).join(tmpColDelim));
+                    });
+                    return '"' + handledRows.join(tmpRowDelim)
+                        .split(tmpRowDelim).join(rowDelim)
+                        .split(tmpColDelim).join(colDelim) + '"';
+                }
+
+                // most compatible csv generator/download <http://stackoverflow.com/a/29304414>
+                function download(content, fileName, mimeType) {
+                    var a = document.createElement('a');
+                    mimeType = mimeType || 'application/octet-stream';
+
+                    if (navigator.msSaveBlob) { // IE10/11/Edge
+                        return navigator.msSaveBlob(new Blob([content], {
+                            type: mimeType
+                        }), fileName);
+                    } else if ('download' in a) { //html5 A[download]
+                        a.href = 'data:' + mimeType + ',' + encodeURIComponent(content);
+                        a.setAttribute('download', fileName);
+                        document.body.appendChild(a);
+                        setTimeout(function() {
+                            a.click();
+                            document.body.removeChild(a);
+                        }, 66);
+                        return true;
+                    } else { //do iframe dataURL download (old ch+FF):
+                        var f = document.createElement('iframe');
+                        document.body.appendChild(f);
+                        f.src = 'data:' + mimeType + ',' + encodeURIComponent(content);
+
+                        setTimeout(function() {
+                            document.body.removeChild(f);
+                        }, 333);
+                        return true;
+                    }
+                }
+            }
+        };
+    }]);
 
     app.run(['$templateCache', function($templateCache) {
         $templateCache.put('cy-table/filters/text.html', '<input type="text" name="{{column.filterName}}" ng-model="params.filter()[name]" ng-change="params.trackChanges(\'filter\', params.filter())" ng-if="filter === \'text\' && params.filterType() === \'local\'" class="input-filter form-control" />');
