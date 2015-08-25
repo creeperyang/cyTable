@@ -1,0 +1,30 @@
+{
+  "name": "cytable",
+  "version": "0.1.0",
+  "homepage": "https://github.com/creeperyang/cyTable",
+  "authors": [
+    "creeperyang <yangcreeper@hotmail.com>"
+  ],
+  "description": "Table direcitve for Angular.",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "table"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.4.4"
+  },
+  "devDependencies": {
+    "angular-bootstrap": "~0.13.3",
+    "bootstrap-sass-official": "~3.3.5"
+  }
+}

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html ng-app='testApp'>
+
+<head>
+    <title>cy-table demo</title>
+    <meta charset='utf8'>
+    <!-- build:css(.) styles/vendor.css -->
+    <!-- bower:css -->
+    <!-- endbower -->
+    <!-- endbuild -->
+    <link rel="stylesheet" type="text/css" href="cy-table.css">
+    <link rel="stylesheet" type="text/css" href="styles/app.css">
+</head>
+
+<body>
+    <div class="container" ng-controller='DemoCtrl'>
+        <div class="jumbotron">
+            <h2>cy-table <small class='text-danger'>v0.1.0</small></h2>
+        </div>
+        <div ng-controller='DemoCtrl'>
+            <div cy-table table-params="tableParams" template-pagination="pager.html" template-operation="operation.html" show-filter="false">
+                <div class="cy-table-operation row"></div>
+                <table class="table table-striped table-hover table-condensed table-bordered">
+                    <tr ng-repeat="device in $data">
+                        <td data-title="'店铺'" sortable="'shopName'">
+                            {{device.shopName}}
+                        </td>
+                        <td data-title="'设备型号'" sortable="'apType'">
+                            {{device.apType}}
+                        </td>
+                        <td data-title="'APID'" sortable="'apid'">
+                            {{device.apid}}
+                        </td>
+                        <td data-title="'注册时间'" sortable="'registerTime'">
+                            {{device.registerTime | date:'yyyy-MM-dd HH:mm:ss'}}
+                        </td>
+                        <td data-title="'状态'" sortable="'isOnline'">
+                            {{device.isOnline}}
+                        </td>
+                        <td data-title="'在线人数'" sortable="'onlineCount'">
+                            {{device.onlineCount}}
+                        </td>
+                        <td data-title="'操作'">
+                            <span class='btn btn-danger' ng-click="removeBinding(device.apid)">{{'删除'}}</span>
+                        </td>
+                    </tr>
+                </table>
+                <div class="cy-loading" ng-show='$loading'>
+                    <i class='glyphicon glyphicon-refresh icon-spin'></i>
+                </div>
+                <div class="cy-table-pagination"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/ng-template" id='pager.html'>
+        <ul class="pager ng-cloak">
+            <li ng-repeat="page in pages" ng-class="{'disabled': !page.active, 'previous': page.type === 'prev', 'next': page.type==='next'}">
+                <a ng-if="page.type === 'prev'" ng-click="params.page(page.number)" href="">Previous</a>
+                <a ng-if="page.type === 'next'" ng-click="params.page(page.number)" href="">Next</a>
+                <a ng-if="page.type === 'page' || page.type === 'first' || page.type === 'last'" ng-click="params.page(page.number)" href="">{{page.number}}</a>
+                <a ng-if="page.type === 'more'" ng-click="params.page(page.number)" href="">...</a>
+            </li>
+        </ul>
+    </script>
+    <script type="text/ng-template" id="operation.html">
+        <div class="oneline-top-space">
+            <div class="col-sm-3">
+                <p>每页项数</p>
+                <div class="cy-dropdown page-size-dropdown" dropdown>
+                    <div class='input-group'>
+                        <input type='text' class='left-input form-control' value='{{params.count()}}' />
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-success right-action" dropdown-toggle>
+                                <i class='glyphicon glyphicon-menu-down'></i>
+                            </button>
+                        </span>
+                    </div>
+                    <ul class="dropdown-menu" role="menu">
+                        <li><a ng-class="{'active':params.count() == 5}" ng-click="params.count(5)">5</a>
+                        </li>
+                        <li><a ng-class="{'active':params.count() == 10}" ng-click="params.count(10)">10</a>
+                        </li>
+                        <li><a ng-class="{'active':params.count() == 15}" ng-click="params.count(15)">15</a>
+                        </li>
+                        <li><a ng-class="{'active':params.count() == 20}" ng-click="params.count(20)">20</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <!-- build:js(.) scripts/vendor.js -->
+    <!-- bower:js -->
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+    
+    <script type="text/javascript" src='scripts/app.js'></script>
+    <script type="text/javascript" src='cy-table.js'></script>
+</body>
+
+</html>
