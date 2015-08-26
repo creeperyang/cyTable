@@ -50,10 +50,13 @@ gulp.task('eslint', function() {
         }))
         .pipe($.eslint())
         .pipe($.eslint.format())
-        .pipe($.if(!browserSync.active, $.eslint.failOnError()));
+        // always let gulp break down when eslint fails
+        .pipe($.eslint.failOnError());
+        // maybe dont let it break down when run with browserSync
+        // .pipe($.if(!browserSync.active, $.eslint.failOnError()));
 });
 
-gulp.task('build', ['clean'], function() {
+gulp.task('build', ['clean', 'eslint'], function() {
     return gulp.src('src/*.{js,scss}')
         .pipe($.if('*.js', $.ngAnnotate()))
         .pipe($.sourcemaps.init())
@@ -160,11 +163,13 @@ gulp.task('wiredep', function() {
 
     gulp.src('./demo/index.html')
         .pipe(wiredep({
-            //exclude: ['bootstrap-sass-official'],
+            // angular-mocks is used for test, not for demo
+            exclude: ['angular-mocks'],
             ignorePath: /^(\.\.\/)*\.\./,
             devDependencies: true,
             overrides: {
                 // dont include jquery and bootstrap.js
+                // not sure why `exclude` not work for this
                 'bootstrap-sass-official': {
                     'main': [],
                     'dependencies': {}
@@ -174,13 +179,11 @@ gulp.task('wiredep', function() {
         .pipe(gulp.dest('./demo'));
 });
 
-gulp.task('demo', ['serve'], function() {
-    // return gulp.src('dist/**/*').pipe($.size({
-    //     title: 'demo',
-    //     gzip: true
-    // }));
-});
+gulp.task('demo', ['serve']);
 
-gulp.task('default', function() {
-    gulp.start('build');
+gulp.task('default', ['build'],function() {
+    return gulp.src('dist/*').pipe($.size({
+        title: 'cy-table',
+        gzip: true
+    }));
 });

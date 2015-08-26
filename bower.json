@@ -9,6 +9,10 @@
   "moduleType": [
     "globals"
   ],
+  "main": [
+    "./dist/cy-table.js",
+    "./dist/cy-table.css"
+  ],
   "keywords": [
     "table"
   ],
@@ -25,6 +29,7 @@
   },
   "devDependencies": {
     "angular-bootstrap": "~0.13.3",
-    "bootstrap-sass-official": "~3.3.5"
+    "bootstrap-sass-official": "~3.3.5",
+    "angular-mocks": "~1.4.4"
   }
 }

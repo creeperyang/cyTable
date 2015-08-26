@@ -676,7 +676,7 @@
                         }
 
                         var titleExpr = getAttrValue('title');
-                        if(titleExpr) {
+                        if (titleExpr) {
                             el.attr('data-title-text', '{{' + titleExpr + '}}');
                         }
                         columns.push({
