@@ -56,6 +56,18 @@ gulp.task('eslint', function() {
         // .pipe($.if(!browserSync.active, $.eslint.failOnError()));
 });
 
+// lint test files
+gulp.task('lint:test', function() {
+    return gulp.src(['test/*.js', 'karma.conf.js'])
+        .pipe(reload({
+            stream: true,
+            once: true
+        }))
+        .pipe($.eslint())
+        .pipe($.eslint.format())
+        .pipe($.eslint.failOnError());
+});
+
 gulp.task('build', ['clean', 'eslint'], function() {
     return gulp.src('src/*.{js,scss}')
         .pipe($.if('*.js', $.ngAnnotate()))

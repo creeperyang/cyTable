@@ -1,5 +1,5 @@
 {
-  "name": "cytable",
+  "name": "cy-table",
   "version": "0.1.0",
   "description": "Table directive for Angular.",
   "main": "dist/cy-table.js",
@@ -11,9 +11,11 @@
     "url": "git+https://github.com/creeperyang/cyTable.git"
   },
   "keywords": [
+    "table direcitve",
+    "cy-table",
     "table",
-    "angular directive",
-    "directive"
+    "angular direcitve",
+    "angular plugin"
   ],
   "author": "creeperyang",
   "license": "MIT",
