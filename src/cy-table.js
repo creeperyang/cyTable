@@ -636,21 +636,27 @@
                     // custom header
                     var table = element.find('table');
                     var thead = table.find('thead');
-                    var row = angular.element(document.querySelector('tr:not(.cy-table-group)'));
+                    var row = angular.element(element[0].querySelector('tr:not(.cy-table-group)'));
 
-                    if (!row) {
+                    if (!row || !row[0]) {
                         return;
                     }
+
                     angular.forEach(row.find('td'), function(item) {
                         var el = angular.element(item);
                         if (el.attr('ignore-cell') && 'true' === el.attr('ignore-cell')) {
                             return;
                         }
+
+                        var getAttrValue = function(attr) {
+                            return el.attr('data-' + attr) || el.attr(attr);
+                        };
                         var parsedAttribute = function(attr, defaultValue) {
+                            var expr = getAttrValue(attr);
                             return function(scope) {
-                                return $parse(el.attr('data-' + attr) || el.attr(attr))(scope, {
+                                return expr ? $parse(expr)(scope, {
                                     $columns: columns
-                                }) || defaultValue;
+                                }) : defaultValue;
                             };
                         };
 
@@ -669,19 +675,22 @@
                             delete filter.templateURL;
                         }
 
-                        el.attr('data-title-text', parsedTitle());
+                        var titleExpr = getAttrValue('title');
+                        if(titleExpr) {
+                            el.attr('data-title-text', '{{' + titleExpr + '}}');
+                        }
                         columns.push({
                             id: i++,
                             title: parsedTitle,
                             sortable: parsedAttribute('sortable', false),
-                            'class': el.attr('data-header-class') || el.attr('header-class'),
+                            'class': parsedAttribute('header-class', ''),
                             filter: filter,
                             filterTemplateURL: filterTemplateURL,
                             filterName: filterName,
                             headerTemplateURL: headerTemplateURL,
                             filterData: (el.attr('filter-data') ? el.attr('filter-data') : null),
-                            show: (el.attr('ng-show') ? function(scope) {
-                                return $parse(el.attr('ng-show'))(scope);
+                            show: (el.attr('ng-if') ? function(scope) {
+                                return $parse(el.attr('ng-if'))(scope);
                             } : function() {
                                 return true;
                             })
@@ -700,11 +709,11 @@
                         attrs.$observe('sortType', function(sortType) {
                             scope.sortType = sortType;
                         });
-                        scope.$watch(attrs.tableParams, (function(params) {
+                        scope.$watch(attrs.cyTable, (function(params) {
                             if (angular.isUndefined(params)) {
                                 return;
                             }
-                            scope.paramsModel = $parse(attrs.tableParams);
+                            scope.paramsModel = $parse(attrs.cyTable);
                             scope.params = params;
                             params.props().$scope = scope;
                         }), true);
@@ -975,7 +984,7 @@
 
     app.run(['$templateCache', function($templateCache) {
         $templateCache.put('cy-table/filters/text.html', '<input type="text" name="{{column.filterName}}" ng-model="params.filter()[name]" ng-change="params.trackChanges(\'filter\', params.filter())" ng-if="filter === \'text\' && params.filterType() === \'local\'" class="input-filter form-control" />');
-        $templateCache.put('cy-table/header.html', '<tr> <th ng-repeat="column in $columns" ng-class="{ \'sortable\': parse(column.sortable), \'sort-asc\': params.sorting()[parse(column.sortable)]==\'asc\', \'sort-desc\': params.sorting()[parse(column.sortable)]==\'desc\' }" ng-click="sortBy(column, $event)" ng-show="column.show(this)" ng-init="template=column.headerTemplateURL(this)" class="header {{column.class}}"> <div ng-if="!template" ng-show="!template" ng-bind="parse(column.title)"></div> <div ng-if="template" ng-show="template"><div ng-include="template"></div></div> </th> </tr> <tr ng-show="showFilter && params.filterType() === \'local\'" class="cy-table-filters"> <th ng-repeat="column in $columns" ng-show="column.show(this)" class="filter"> <div ng-repeat="(name, filter) in column.filter"> <div ng-if="column.filterTemplateURL" ng-show="column.filterTemplateURL"> <div ng-include="column.filterTemplateURL"></div> </div> <div ng-if="!column.filterTemplateURL" ng-show="!column.filterTemplateURL"> <div ng-include="\'cy-table/filters/\' + filter + \'.html\'"></div> </div> </div> </th> </tr>');
+        $templateCache.put('cy-table/header.html', '<tr><th ng-repeat="$column in $columns" ng-if="$column.show(this)" data-title="{{$column.title(this)}}" ng-class="{ \'sortable\': parse($column.sortable), \'sort-asc\': params.sorting()[parse($column.sortable)]==\'asc\', \'sort-desc\': params.sorting()[parse($column.sortable)]==\'desc\' }" ng-click="sortBy($column, $event)" ng-init="template=$column.headerTemplateURL(this)" class="header {{$column.class(this)}}"><div ng-if="!template" ng-bind="$column.title(this)"></div><div ng-if="template"><div ng-include="template"></div></div></th></tr><tr ng-show="showFilter && params.filterType() === \'local\'" class="cy-table-filters"><th ng-repeat="$column in $columns" data-title-text="{{$column.title(this)}}" ng-if="$column.show(this)" class="filter"><div ng-repeat="(name, filter) in $column.filter"><div ng-if="$column.filterTemplateURL"><div ng-include="$column.filterTemplateURL"></div></div><div ng-if="!$column.filterTemplateURL"><div ng-include="\'cy-table/filters/\' + filter + \'.html\'"></div></div></div></th></tr>');
         $templateCache.put('cy-table/pager.html', '<ul class="cy-table-pager pager ng-cloak"><li ng-repeat="page in pages" ng-class="{\'disabled\': !page.active, \'previous\': page.type === \'prev\', \'next\': page.type===\'next\'}"><a ng-if="page.type === \'prev\'" ng-click="params.page(page.number)" href="">Prev</a><a ng-if="page.type === \'next\'" ng-click="params.page(page.number)" href="">Next</a><a ng-if="page.type === \'page\' || page.type === \'first\' || page.type === \'last\'" ng-click="params.page(page.number)" href="">{{page.number}}</a><a ng-if="page.type === \'more\'" ng-click="params.page(page.number)" href="">...</a></li></ul>');
     }]);
 

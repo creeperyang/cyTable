@@ -18,7 +18,7 @@
             <h2>cy-table <small class='text-danger'>v0.1.0</small></h2>
         </div>
         <div ng-controller='DemoCtrl'>
-            <div cy-table cy-table-csv='tableCsv' table-params="tableParams" template-pagination="pager.html" template-operation="operation.html" show-filter="false">
+            <div cy-table='tableParams' cy-table-csv='tableCsv' template-pagination="pager.html" template-operation="operation.html" show-filter="false">
                 <div class="cy-table-operation row"></div>
                 <table class="table table-striped table-hover table-condensed table-bordered">
                     <tr ng-repeat="device in $data">
