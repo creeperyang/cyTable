@@ -25,7 +25,7 @@
   "homepage": "https://github.com/creeperyang/cyTable#readme",
   "devDependencies": {
     "autoprefixer-core": "^4.0.2",
-    "browser-sync": "^1.8.2",
+    "browser-sync": "^2.8.2",
     "codecov.io": "^0.1.6",
     "del": "^1.1.1",
     "gulp": "^3.6.0",
