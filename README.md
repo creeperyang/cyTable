@@ -10,6 +10,16 @@ This angular module help you to build powerful tables. It is easy to use, and it
 bower install cy-table
 ```
 
+## Usage
+
+[cyTable guide](http://creeperyang.github.io/cyTable/)
+
+## Features
+
+- Easy to use. The plugin itself has default templates and behavior (including pagination, sorting...). So only little code can generate a powerful table.
+- Flexible. You can custom it easily via change its config items.
+- Powerful. Support for sort and filter.
+
 ## Test
 
 Karma is used to test the code.
@@ -31,12 +41,6 @@ gulp demo
 ```
 
 ![cy-table-demo](http://7sbnba.com1.z0.glb.clouddn.com/github-cy-table.png)
-
-## Features
-
-- Easy to use. The plugin itself has default templates and behavior (including pagination, sorting...). So only little code can generate a powerful table.
-- Flexible. You can custom it easily via change its config items.
-- Powerful. 
 
 ## Release History
 
