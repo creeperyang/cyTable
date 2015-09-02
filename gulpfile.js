@@ -191,6 +191,12 @@ gulp.task('wiredep', function() {
         .pipe(gulp.dest('./demo'));
 });
 
+// deploy to gh-pages
+gulp.task('deploy', function() {
+    return gulp.src('./gitbook-for-ghpages/_book/**/*')
+        .pipe($.ghPages());
+});
+
 gulp.task('demo', ['serve']);
 
 gulp.task('default', ['build'],function() {

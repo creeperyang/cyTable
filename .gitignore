@@ -3,3 +3,7 @@ node_modules
 bower_components
 demo/fonts
 coverage
+.tmp
+.DS_Store
+.publish
+_book
